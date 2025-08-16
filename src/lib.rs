@@ -17,7 +17,21 @@ impl Config {
         let query = args[1].clone();
         let file_path = args[2].clone();
 
-        let ignore_case = env::var("IGNORE_CASE").is_ok();
+        let cmd_ignore_case = if args.contains(&String::from("-i"))
+            || args.contains(&String::from("--case-insensitive"))
+        {
+            Some(true)
+        } else if args.contains(&String::from("-s"))
+            || args.contains(&String::from("--case-sensitive"))
+        {
+            Some(false)
+        } else {
+            None
+        };
+
+        let env_ignore_case = env::var("IGNORE_CASE").ok().map(|_| true);
+
+        let ignore_case = cmd_ignore_case.or(env_ignore_case).unwrap_or(false);
 
         Ok(Config {
             query,
